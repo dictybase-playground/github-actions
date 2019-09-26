@@ -9,4 +9,4 @@ RUN npm install -g lighthouse
 ENV CI=true
 
 ADD entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["sh", "/entrypoint.sh"]
