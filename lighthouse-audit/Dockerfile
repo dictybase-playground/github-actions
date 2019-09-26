@@ -1,4 +1,3 @@
-# Base image built from Dockerfile.base (Chrome Stable + Node LTS)
 FROM dictybase/chrome-headless:latest
 
 # Download latest Lighthouse build from npm
