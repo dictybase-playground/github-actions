@@ -1,4 +1,4 @@
-FROM dictybase/chrome-headless:latest
+FROM dictybase/headless-chrome:latest
 
 # Download latest Lighthouse build from npm
 # Cache bust to ensure latest version when building the image
