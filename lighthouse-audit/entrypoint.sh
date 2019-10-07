@@ -34,5 +34,32 @@ printf "+-------------------------------+\n\n"
 printf "* Detailed results are saved here, use https://github.com/actions/upload-artifact to retrieve them:\n"
 printf "    %s\n" "$OUTPUT_PATH.report.html"
 printf "    %s\n" "$OUTPUT_PATH.report.json"
+printf "  Also check pull request for additional information"
+
+PERF=$(echo "$SCORE_PERFORMANCE*100" | bc -l)
+ACC=$(echo "$SCORE_ACCESSIBILITY*100" | bc -l)
+BP=$(echo "$SCORE_PRACTICES*100" | bc -l)
+SEO=$(echo "$SCORE_SEO*100" | bc -l)
+PWA=$(echo "$SCORE_PWA*100" | bc -l)
+URL=$(echo "https://lighthouse-dot-webdotdevsite.appspot.com/lh/html?url=$INPUT_URL")
+
+PAYLOAD=$(echo '{}' | jq --arg body "Completed audit of $INPUT_URL.
+
+Scores are printed below:
+
++-------------------------------+
+|  Performance:           $PERF
+|  Accessibility:         $ACC
+|  Best Practices:        $BP
+|  SEO:                   $SEO
+|  Progressive Web App:   $PWA
++-------------------------------+
+
+View HTML report here: 
+$URL" '.body = $body')
+COMMENTS_URL=$(cat /github/workflow/event.json | jq -r .pull_request.comments_url)
+
+# Post results as comment in pull request
+curl -s -S -H "Authorization: token $GH_TOKEN" --header "Content-Type: application/json" --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
 
 exit 0
