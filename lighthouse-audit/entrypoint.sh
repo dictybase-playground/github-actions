@@ -43,7 +43,9 @@ SEO=$(echo "$SCORE_SEO*100" | bc -l)
 PWA=$(echo "$SCORE_PWA*100" | bc -l)
 URL=$(echo "https://lighthouse-dot-webdotdevsite.appspot.com/lh/html?url=$INPUT_URL")
 
-PAYLOAD=$(echo '{}' | jq --arg body "Completed audit of $INPUT_URL.
+PAYLOAD=$(echo '{}' | jq --arg body "### Completed audit
+
+$INPUT_URL
 
 Scores are printed below:
 
@@ -57,9 +59,10 @@ Scores are printed below:
 
 View HTML report here: 
 $URL" '.body = $body')
-COMMENTS_URL=$(cat /github/workflow/event.json | jq -r .pull_request.comments_url)
 
-# Post results as comment in pull request
-curl -s -S -H "Authorization: token $GH_TOKEN" --header "Content-Type: application/json" --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
+curl -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/issues" \
+     -H "Authorization: token $GITHUB_TOKEN" \
+     -H "Content-Type: text/plain; charset=utf-8" \
+     -d '{"title": "Lighthouse audit results -- commit $GITHUB_SHA", "body": "$PAYLOAD", "labels": ["lighthouse"]}'
 
 exit 0
