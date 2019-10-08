@@ -63,6 +63,6 @@ $URL" '.body = $body')
 curl -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/issues" \
      -H "Authorization: token $GH_TOKEN" \
      -H "Content-Type: text/plain; charset=utf-8" \
-     -d '{"title": "Lighthouse audit results -- commit $GITHUB_SHA", "body": "$PAYLOAD", "labels": ["lighthouse"]}'
+     -d '{"title": "Lighthouse audit results (commit '$GITHUB_SHA')", "body": "'$PAYLOAD'", "labels": ["lighthouse"]}'
 
 exit 0
