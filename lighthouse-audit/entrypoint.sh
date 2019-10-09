@@ -2,9 +2,12 @@
 
 set -e
 
+DATE=$(date +%F)
+
 # Prepare directory for audit results and sanitize URL to a valid and unique filename.
 OUTPUT_FOLDER="report"
-OUTPUT_FILENAME=$(echo "$INPUT_URL" | sed 's/[^a-zA-Z0-9]/_/g')
+OUTPUT_URL="${INPUT_URL}_${DATE}"
+OUTPUT_FILENAME=$(echo "$OUTPUT_URL" | sed 's/[^a-zA-Z0-9]/_/g')
 OUTPUT_PATH="$GITHUB_WORKSPACE/$OUTPUT_FOLDER/$OUTPUT_FILENAME"
 mkdir -p "$OUTPUT_FOLDER"
 
@@ -34,35 +37,18 @@ printf "+-------------------------------+\n\n"
 printf "* Detailed results are saved here, use https://github.com/actions/upload-artifact to retrieve them:\n"
 printf "    %s\n" "$OUTPUT_PATH.report.html"
 printf "    %s\n" "$OUTPUT_PATH.report.json"
-printf "  Also check pull request for additional information"
 
 PERF=$(echo "$SCORE_PERFORMANCE*100" | bc -l)
 ACC=$(echo "$SCORE_ACCESSIBILITY*100" | bc -l)
 BP=$(echo "$SCORE_PRACTICES*100" | bc -l)
 SEO=$(echo "$SCORE_SEO*100" | bc -l)
 PWA=$(echo "$SCORE_PWA*100" | bc -l)
-URL=$(echo "https://lighthouse-dot-webdotdevsite.appspot.com/lh/html?url=$INPUT_URL")
 
-PAYLOAD=$(echo '{}' | jq --arg body "### Completed audit
-
-$INPUT_URL
-
-Scores are printed below:
-
-+-------------------------------+
-|  Performance:           $PERF
-|  Accessibility:         $ACC
-|  Best Practices:        $BP
-|  SEO:                   $SEO
-|  Progressive Web App:   $PWA
-+-------------------------------+
-
-View HTML report here: 
-$URL" '.body = $body')
+PAYLOAD="## Completed audit - $DATE\n\n$INPUT_URL\n\nScores are printed below:\n\n+-------------------------------+\n- **Performance**: *$PERF*\n- **Accessibility**: *$ACC*\n- **Best Practices**: *$BP*\n- **SEO**: *$SEO*\n- **Progressive Web App**: *$PWA*\n\n+-------------------------------+\n\nView HTML report [here]($BUCKET_PATH/$OUTPUT_FILENAME.report.html)."
 
 curl -X POST "https://api.github.com/repos/$GITHUB_REPOSITORY/issues" \
      -H "Authorization: token $GH_TOKEN" \
      -H "Content-Type: text/plain; charset=utf-8" \
-     -d '{"title": "Lighthouse audit results (commit '$GITHUB_SHA')", "body": "'$PAYLOAD'", "labels": ["lighthouse"]}'
+     -d '{"title": "Lighthouse audit results ('"$DATE"')", "body": "'"$PAYLOAD"'", "labels": ["lighthouse"]}'
 
 exit 0
