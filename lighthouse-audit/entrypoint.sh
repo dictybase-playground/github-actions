@@ -6,7 +6,7 @@ DATE=$(date +%F)
 
 # Prepare directory for audit results and sanitize URL to a valid and unique filename.
 OUTPUT_FOLDER="report"
-OUTPUT_URL="${INPUT_URL}_${DATE}"
+OUTPUT_URL="${INPUT_URL}_${DATE}_${GITHUB_SHA}"
 OUTPUT_FILENAME=$(echo "$OUTPUT_URL" | sed 's/[^a-zA-Z0-9]/_/g')
 OUTPUT_PATH="$GITHUB_WORKSPACE/$OUTPUT_FOLDER/$OUTPUT_FILENAME"
 mkdir -p "$OUTPUT_FOLDER"
